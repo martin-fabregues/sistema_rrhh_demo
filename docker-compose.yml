@@ -1,0 +1,68 @@
+version: '3.8'
+
+# Sistema RRHH - Portainer Compatible
+# Variables: REGISTRY_URL, IMAGE_TAG, DB_USER, DB_PASSWORD, DB_NAME, JWT_SECRET, FRONTEND_URL, REACT_APP_API_BASE_URL
+
+services:
+  backend:
+    image: fabreguesm/sistema_rrhh_back:1.0.64
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL}
+      EMAIL_ENABLED: ${EMAIL_ENABLED}
+      TZ: America/Argentina/Cordoba
+      VPN_ENDPOINT_INTERNAL: ${VPN_ENDPOINT_INTERNAL}
+      VPN_ENDPOINT_REMOTE: ${VPN_ENDPOINT_REMOTE}
+      VPN_ENDPOINT_PROCOM_REMOTO: ${VPN_ENDPOINT_PROCOM_REMOTO}
+      VPN_ENDPOINT_PROCOM_PRESENCIAL: ${VPN_ENDPOINT_PROCOM_PRESENCIAL}
+      DB_POOL_LIMIT: ${DB_POOL_LIMIT}
+      DB_ACQUIRE_TIMEOUT_MS: ${DB_ACQUIRE_TIMEOUT_MS}
+    ports:
+      - "3001:3001"
+    volumes:
+      - backend_uploads:/app/uploads
+   # healthcheck:
+    #  test: ["CMD", "wget", "--no-verbose", "--tries=3", "--spider", "http://127.0.0.1:3001/api/health", "||", "exit", "1"]
+    #  interval: 30s
+    #  timeout: 10s
+    #  retries: 3
+    restart: unless-stopped
+    networks:
+      - traefik
+
+  frontend:
+    build: ./frontend
+    image: fabreguesm/sistema_rrhh_front:1.0.62
+    environment:
+      REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-http://10.250.0.68:3001/api}
+      TZ: America/Argentina/Cordoba
+    ports:
+      - "3002:80"
+    depends_on:
+      - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+   # healthcheck:
+    #  test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80", "||", "exit", "1"]
+      #interval: 30s
+     # timeout: 10s
+     # retries: 3
+    restart: unless-stopped
+    networks:
+      - traefik
+      
+volumes:
+  backend_uploads:
+
+networks:
+  traefik:
+    external:
+      name: traefik

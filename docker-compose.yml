@@ -7,21 +7,25 @@ services:
       placement:
         constraints: ["${NODE}"]  
     environment:
-      - DB_HOST: ${DB_HOST}
-      - DB_PORT: ${DB_PORT}
-      - DB_USER: ${DB_USER}
-      - DB_PASSWORD: ${DB_PASSWORD}
-      - DB_NAME: ${DB_NAME}
-      - JWT_SECRET: ${JWT_SECRET}
-      - FRONTEND_URL: ${FRONTEND_URL}
-      - EMAIL_ENABLED: ${EMAIL_ENABLED}
-      - TZ: America/Argentina/Cordoba
-      - VPN_ENDPOINT_INTERNAL: ${VPN_ENDPOINT_INTERNAL}
-      - VPN_ENDPOINT_REMOTE: ${VPN_ENDPOINT_REMOTE}
-      - VPN_ENDPOINT_PROCOM_REMOTO: ${VPN_ENDPOINT_PROCOM_REMOTO}
-      - VPN_ENDPOINT_PROCOM_PRESENCIAL: ${VPN_ENDPOINT_PROCOM_PRESENCIAL}
-      - DB_POOL_LIMIT: ${DB_POOL_LIMIT}
-      - DB_ACQUIRE_TIMEOUT_MS: ${DB_ACQUIRE_TIMEOUT_MS}
+      - DB_HOST=10.250.0.68
+      - DB_PORT=5002
+      - DB_USER=root
+      - DB_PASSWORD=Flexxus2023**
+      - DB_NAME=sistema_rrhh
+      - JWT_SECRET=your_jwt_secret_key_minimum_32_chars
+      - FRONTEND_URL=http://10.250.0.68:3002
+      - EMAIL_ENABLED=false
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=your_email@domain.com
+      - SMTP_PASS=your_app_password
+      - TZ=America/Argentina/Cordoba
+      - VPN_ENDPOINT_INTERNAL=https://10.150.253.253/api/?type=op&cmd=%3Cshow%3E%3Cglobal-protect-gateway%3E%3Ccurrent-user%3E%3Cgateway%3EGW-FLX_Internal%3C/gateway%3E%3C/current-user%3E%3C/global-protect-gateway%3E%3C/show%3E&key=LUFRPT14bmhIMG8vVkVQR25rbFI2L1FCTlp0MEs5dGc9Rmx0RzAwREx0anRFakg3cEdYdHppQ3l3NXVCSzZ3L1haeUtvNExISDQ5cDZGVGdjOGV3QnpoSkEvSDEzeGpXOVFPRmEyVkFJQnFhVE5LTG83ejFMckE9PQ==
+      - VPN_ENDPOINT_REMOTE=https://10.150.253.253/api/?type=op&cmd=%3Cshow%3E%3Cglobal-protect-gateway%3E%3Ccurrent-user%3E%3Cgateway%3EGW-Flexxus_TELECOM%3C/gateway%3E%3C/current-user%3E%3C/global-protect-gateway%3E%3C/show%3E&key=LUFRPT14bmhIMG8vVkVQR25rbFI2L1FCTlp0MEs5dGc9Rmx0RzAwREx0anRFakg3cEdYdHppQ3l3NXVCSzZ3L1haeUtvNExISDQ5cDZGVGdjOGV3QnpoSkEvSDEzeGpXOVFPRmEyVkFJQnFhVE5LTG83ejFMckE9PQ==
+      - VPN_ENDPOINT_PROCOM_REMOTO=https://10.150.253.253/api/?type=op&cmd=%3Cshow%3E%3Cglobal-protect-gateway%3E%3Ccurrent-user%3E%3Cgateway%3EGW-CLARO%3C/gateway%3E%3C/current-user%3E%3C/global-protect-gateway%3E%3C/show%3E&key=LUFRPT14bmhIMG8vVkVQR25rbFI2L1FCTlp0MEs5dGc9Rmx0RzAwREx0anRFakg3cEdYdHppQ3l3NXVCSzZ3L1haeUtvNExISDQ5cDZGVGdjOGV3QnpoSkEvSDEzeGpXOVFPRmEyVkFJQnFhVE5LTG83ejFMckE9PQ==
+      - VPN_ENDPOINT_PROCOM_PRESENCIAL=https://10.150.253.253/api/?type=op&cmd=%3Cshow%3E%3Cglobal-protect-gateway%3E%3Ccurrent-user%3E%3Cgateway%3EGW-Internal%3C/gateway%3E%3C/current-user%3E%3C/global-protect-gateway%3E%3C/show%3E&key=LUFRPT14bmhIMG8vVkVQR25rbFI2L1FCTlp0MEs5dGc9Rmx0RzAwREx0anRFakg3cEdYdHppQ3l3NXVCSzZ3L1haeUtvNExISDQ5cDZGVGdjOGV3QnpoSkEvSDEzeGpXOVFPRmEyVkFJQnFhVE5LTG83ejFMckE9PQ==
+      - DB_POOL_LIMIT=300
+      - DB_ACQUIRE_TIMEOUT_MS=40000
     ports:
       - "3001:3001"
     volumes:
@@ -48,8 +52,8 @@ services:
         - "traefik.http.routers.${SERVICE_NAME}-https.tls.certresolver=myresolver"
         - "traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=80"      
     environment:
-      REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-http://10.250.0.68:3001/api}
-      TZ: America/Argentina/Cordoba
+      - REACT_APP_API_BASE_URL=http://10.250.0.68:3001/api
+      - TZ=America/Argentina/Cordoba
     ports:
       - "3002:80"
     networks:
@@ -64,4 +68,4 @@ volumes:
 networks:
   traefik:
     external:
-      name: traefik
+      name: traefik-network

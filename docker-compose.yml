@@ -6,22 +6,25 @@ version: '3.8'
 services:
   backend:
     image: fabreguesm/sistema_rrhh_back:1.0.64
+    deploy:
+      placement:
+        constraints: ["${NODE}"]  
     environment:
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      JWT_SECRET: ${JWT_SECRET}
-      FRONTEND_URL: ${FRONTEND_URL}
-      EMAIL_ENABLED: ${EMAIL_ENABLED}
-      TZ: America/Argentina/Cordoba
-      VPN_ENDPOINT_INTERNAL: ${VPN_ENDPOINT_INTERNAL}
-      VPN_ENDPOINT_REMOTE: ${VPN_ENDPOINT_REMOTE}
-      VPN_ENDPOINT_PROCOM_REMOTO: ${VPN_ENDPOINT_PROCOM_REMOTO}
-      VPN_ENDPOINT_PROCOM_PRESENCIAL: ${VPN_ENDPOINT_PROCOM_PRESENCIAL}
-      DB_POOL_LIMIT: ${DB_POOL_LIMIT}
-      DB_ACQUIRE_TIMEOUT_MS: ${DB_ACQUIRE_TIMEOUT_MS}
+      - DB_HOST: ${DB_HOST}
+      - DB_PORT: ${DB_PORT}
+      - DB_USER: ${DB_USER}
+      - DB_PASSWORD: ${DB_PASSWORD}
+      - DB_NAME: ${DB_NAME}
+      - JWT_SECRET: ${JWT_SECRET}
+      - FRONTEND_URL: ${FRONTEND_URL}
+      - EMAIL_ENABLED: ${EMAIL_ENABLED}
+      - TZ: America/Argentina/Cordoba
+      - VPN_ENDPOINT_INTERNAL: ${VPN_ENDPOINT_INTERNAL}
+      - VPN_ENDPOINT_REMOTE: ${VPN_ENDPOINT_REMOTE}
+      - VPN_ENDPOINT_PROCOM_REMOTO: ${VPN_ENDPOINT_PROCOM_REMOTO}
+      - VPN_ENDPOINT_PROCOM_PRESENCIAL: ${VPN_ENDPOINT_PROCOM_PRESENCIAL}
+      - DB_POOL_LIMIT: ${DB_POOL_LIMIT}
+      - DB_ACQUIRE_TIMEOUT_MS: ${DB_ACQUIRE_TIMEOUT_MS}
     ports:
       - "3001:3001"
     volumes:
@@ -34,10 +37,26 @@ services:
     restart: unless-stopped
     networks:
       - traefik
-
+    logging:
+      driver: loki
+      options:
+        loki-url: ${LOKI_URL}  
   frontend:
     build: ./frontend
     image: fabreguesm/sistema_rrhh_front:1.0.62
+    deploy:
+      placement:
+        constraints: ["${NODE}"]  
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.${SERVICE_NAME}.entrypoints=web"
+        - "traefik.http.routers.${SERVICE_NAME}.rule=Host(`${DOMAIN_NAME}`)"
+        - "traefik.http.middlewares.${SERVICE_NAME}-http.redirectscheme.scheme=https"
+        - "traefik.http.routers.${SERVICE_NAME}-https.rule=Host(`${DOMAIN_NAME}`)"
+        - "traefik.http.routers.${SERVICE_NAME}-https.entrypoints=https"
+        - "traefik.http.routers.${SERVICE_NAME}-https.tls=true"
+        - "traefik.http.routers.${SERVICE_NAME}-https.tls.certresolver=myresolver"
+        - "traefik.http.services.${SERVICE_NAME}.loadbalancer.server.port=80"      
     environment:
       REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-http://10.250.0.68:3001/api}
       TZ: America/Argentina/Cordoba
@@ -58,7 +77,10 @@ services:
     restart: unless-stopped
     networks:
       - traefik
-      
+    logging:
+      driver: loki
+      options:
+        loki-url: ${LOKI_URL}    
 volumes:
   backend_uploads:
 
